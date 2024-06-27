@@ -2,15 +2,23 @@ clc
 clear all;
 close all;
 %%%%%%%%%%%%%%%
-way_points = [[100,100];[2100,100];[2100,300];[100,300];[100,500];[2100,500];[2100,700];[100,900]];
+% Num = 5000;
+% stepn = 100;
+% x = 0:stepn:Num;
+% y = 5000*sin(0.005*x);
+% way_points = [x' y'];
+
+
+way_points = [[100,100];[500,300];[900,500];[1300,900];[900,900];[500,1100];[100,1300];[500,2000]];
 Npoints = way_points(:,1);
 Epoints = way_points(:,2);
-total = size(way_points);
+total = size(way_points); 
 total = total(1);
+
 %%%%%%%%%%%%%%%%
 h=.5;
 %步长
-m=40000; %总共运行时间
+m=20000; %总共运行时间
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%
 For = 0; %力初始化
@@ -25,23 +33,25 @@ Dir = 180/180*pi*rand(1);
 %%%%%%%%%%%%%%%%%
 K_p = 50; K_i = 1.1; K_d = 0; %主推控制力 PID参数，可调整pid参数使控制效果更
 %好
-K_p1 = 100; K_i1 = 10; K_d1 = 10; %舵力矩PID参数，可调整pid参数使控制效果更好
-beta = 5;
+K_p1 = 100; K_i1 = 100; K_d1 = 10; %舵力矩PID参数，可调整pid参数使控制效果更好
+beta = .5;
+
+FOR_MAX = 1.5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ud = 1; psid = 90*pi/180; %期望速度，期望艏向
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ue = 0; ue1 = 0; ue2 = 0; %初始化速度误差
 psie = 0; psie1 = 0; psie2 = 0; %初始化艏向误差
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Lnpp = 100;
-R0 = 50;
-
+Lnpp = 50;
+R0=adative_radius(way_points,50,20,1,total);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%变量初始化
 Force = zeros(m,1);
 Torque = zeros(m,1);
 Error = zeros(m,1);
 PSID = zeros(m,1);
+BETA = zeros(m,1);
 Output = zeros(m,1);
 x = zeros(6,1); %临时状态变量
 T=zeros(m,1); %时间
@@ -51,8 +61,8 @@ k = 1;
 u0 = 0;
 v0 = 0;
 r0 = 0;
-x0 = 30;
-y0 = 30;
+x0 = 0;
+y0 = 0;
 psi0 = 80*pi/180;
 Initial = [u0;v0;r0;x0;y0;psi0];
 x = Initial;
@@ -89,6 +99,11 @@ ue1 = ue;
 ue = ud-Y(i,1);
 For = For+K_p*(ue-ue1)+K_i*ue+K_d*(ue-2*ue1+ue2); %这里就是所设计的 PID 控制
 %器，根据速度误差来调整推力的大小
+if For > FOR_MAX
+For = FOR_MAX;
+elseif For < -FOR_MAX
+For = -FOR_MAX;
+end
 psie2 = psie1;
 psie1 = psie;
 psie = psid- Y(i,6);
@@ -97,13 +112,18 @@ psie = psie- 2*pi;
 elseif psie <-pi
 psie = psie + 2*pi;
 end
-
+% if abs(psie) < 5/180*pi
+%     psie = 0;
+% end
 Error(i,1) = psie;
 if psie > beta
-Tor = Tor+K_p1*(psie-psie1)+K_d1*(psie-2*psie1+psie2);%这里用 PID 控制器根据艏向角误差来调整舵的力矩
+delta_u = K_p1*(psie-psie1)+K_d1*(psie-2*psie1+psie2);%这里用 PID 控制器根据艏向角误差来调整舵的力矩
 else
-Tor = Tor+K_p1*(psie-psie1)+K_i1*psie+K_d1*(psie-2*psie1+psie2);%这里用 PID 控制
+delta_u = K_p1*(psie-psie1)+K_i1*psie+K_d1*(psie-2*psie1+psie2);%这里用 PID 控制
 end
+
+Tor = Tor + delta_u;
+
 
 
 
@@ -123,11 +143,11 @@ if isend == 1
     
 end
 if mod(i,10) ==0
-psid = los_angle(way_points,Y(i,4),Y(i,5),k,8,Lnpp);
+[beta,psid] = los_angle(way_points,Y(i,4),Y(i,5),k,total,Lnpp);
 end
 
 PSID(i,1) = psid/pi*180;
-
+BETA(i,1) = beta;
 end
 rad2deg = 180/pi;
 U =Y(:,1);
@@ -136,6 +156,7 @@ R =Y(:,3);
 Xp =Y(:,4);
 Yp =Y(:,5);
 Psi = Y(:,6);
+
 %%%%画图
 figure(1); %%%控制器输出力与力矩
 subplot(2,1,1);plot(T,Force,'b','LineWidth',2);xlabel('t [s]');ylabel('F[N]');grid on;
@@ -148,4 +169,7 @@ subplot(3,1,3);plot(T,R,'b','LineWidth',2);xlabel('t [s]');ylabel('r(yaw vel.)[r
 title('Robot velocities in surge, sway and yaw');
 figure(3);%%% x,y 方向实际轨迹与期望轨迹
 subplot(211);plot(Xp,Yp,'b','LineWidth',2);xlabel(' 东 向 位 移 [m]');ylabel(' 北 向 位 移[m]');title('UUV 航迹');grid on;hold on;plot(Npoints,Epoints,'r--');legend('实际航迹','期望航迹');grid on;
-subplot(212);plot(T,PSID,'r--','LineWidth',2);grid on;xlabel('仿真时间');ylabel('误差(m)');
+subplot(212);plot(T,BETA,'r--','LineWidth',2);grid on;xlabel('仿真时间');ylabel('误差(m)');
+figure(4);
+subplot(211);plot(T,PSID,'r--','LineWidth',2);grid on;xlabel('仿真时间');ylabel('期望航向(°)');
+subplot(212);plot(T,Error,'r--','LineWidth',2);grid on;xlabel('仿真时间');ylabel('航向误差(°)');
