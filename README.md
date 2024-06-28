@@ -1,6 +1,6 @@
 the work for class of auv navigating system desgin,written in .m files
 
-features:
+## features:  
 1.Underdriven 6 DOF models from the chapter auv_sim of class control_system_digital_sim  
 2.los_angle calc functions  
 3.waypoint change using lnpp and arriving radius  
