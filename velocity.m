@@ -1,18 +1,15 @@
-function [isend,k,velocity] = point(way_points,x,y,k,total,R0,V0)
+function [isend,k] = point(way_points,x,y,k,total,Lnpp,R0)
     isend = 0;
     point_k = way_points(k,:); 
     point_n = [x,y];
     
     r = norm(point_k-point_n);
     if k == 1
-        R = 100;%rmax
-        velocity = 2;
+        R = 40;%rmax
     elseif k == total
-        R = 50;%rmin
-        velocity = 1;
+        R = 20;%rmin
     else
         R = R0(k-1);
-        velocity = V0(k-1);
     end
     
     if(r <= R) 

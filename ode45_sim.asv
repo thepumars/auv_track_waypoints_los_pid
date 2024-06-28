@@ -7,45 +7,47 @@ close all;
 % x = 0:stepn:Num;
 % y = 5000*sin(0.005*x);
 % way_points = [x' y'];
-%¿ÉÑ¡µÄÕýÏÒÓàÏÒÂ·Ïß·Ö½â³ÉÂ·¾¶µã
+%å¯é€‰çš„æ­£å¼¦ä½™å¼¦è·¯çº¿åˆ†è§£æˆè·¯å¾„ç‚¹
 
-way_points = [[100,100];[500,300];[900,500];[1300,900];[900,900];[500,1100];[100,1300];[500,2000]];%ÊÖ¶¯¸ø³öµÄÂ·¾¶µã
-Npoints = way_points(:,1);%Â·¾¶µã±±×ø±ê
-Epoints = way_points(:,2);%Â·¾¶µã¶«×ø±ê
-total = size(way_points); %Â·¾¶µã×ÜÊý£¬¹©µ¼Òýº½Â·µã×ª»»Ê¹ÓÃ
+way_points = [[100,100];[500,300];[900,500];[1300,900];[900,900];[500,1100];[100,1300];[500,2000]];%æ‰‹åŠ¨ç»™å‡ºçš„è·¯å¾„ç‚¹
+Npoints = way_points(:,1);%è·¯å¾„ç‚¹åŒ—åæ ‡
+Epoints = way_points(:,2);%è·¯å¾„ç‚¹ä¸œåæ ‡
+total = size(way_points); 
 total = total(1);
 
 %%%%%%%%%%%%%%%%
-h=.5;%²½³¤ 
-m=10000; %×Ü¹²ÔËÐÐµãÊý  p.s. ÔËÐÐÊ±¼ä = ÔËÐÐµãÊý*²½³¤
+h=.5;
+%æ­¥é•¿
+m=10000; %æ€»å…±è¿è¡Œæ—¶é—´
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%
-For = 0; %Á¦³õÊ¼»¯
-Tor = 0;%Á¦¾Ø³õÊ¼»¯
+For = 0; %åŠ›åˆå§‹åŒ–
+Tor = 0;%åŠ›çŸ©åˆå§‹åŒ–
 s = rng(23);
-Cur = 1*randn(1);%±ê×¼²îÎª1µÄº£Á÷ËÙ¶È
-Dir = 360/180*pi*rand(1);%±ê×¼²îÎª360¡ãµÄº£Á÷·½Ïò£¬¼´¸÷Ïò¶¼ÓÐÀ´Á÷
+Cur = 0*randn(1);%æ ‡å‡†å·®ä¸º1çš„æµ·æµé€Ÿåº¦
+Dir = 360/180*pi*rand(1);%æ ‡å‡†å·®ä¸º360Â°çš„æµ·æµæ–¹å‘ï¼Œå³å„å‘éƒ½æœ‰æ¥æµ
+%æµ·æµå¤§å°ï¼ˆå¯æ ¹æ®å®žé™…æƒ…å†µè°ƒæ•´ï¼‰
+%æµ·æµæ–¹å‘
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%
-K_p = 50; K_i = 2.1; K_d = 0; %Ö÷ÍÆ¿ØÖÆÁ¦ PID²ÎÊý£¬¿Éµ÷Õûpid²ÎÊýÊ¹¿ØÖÆÐ§¹û¸ü
-%ºÃ
-K_p1 = 100; K_i1 = 1; K_d1 = 0; %¶æÁ¦¾ØPID²ÎÊý£¬¿Éµ÷Õûpid²ÎÊýÊ¹¿ØÖÆÐ§¹û¸üºÃ
-beta = 3/180*pi;
+K_p = 50; K_i = 2.1; K_d = 0; %ä¸»æŽ¨æŽ§åˆ¶åŠ› PIDå‚æ•°ï¼Œå¯è°ƒæ•´pidå‚æ•°ä½¿æŽ§åˆ¶æ•ˆæžœæ›´
+%å¥½
+K_p1 = 100; K_i1 = 0.001; K_d1 = 0; %èˆµåŠ›çŸ©PIDå‚æ•°ï¼Œå¯è°ƒæ•´pidå‚æ•°ä½¿æŽ§åˆ¶æ•ˆæžœæ›´å¥½
+beta = .5/180*pi;
 velocity = 1;
 FOR_MAX = 30;
-TOR_MAX = 150;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ud = velocity; psid = 90*pi/180; %ÆÚÍûËÙ¶È£¬ÆÚÍûô¼Ïò
+ud = velocity; psid = 90*pi/180; %æœŸæœ›é€Ÿåº¦ï¼ŒæœŸæœ›è‰å‘
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ue = 0; ue1 = 0; ue2 = 0; %³õÊ¼»¯ËÙ¶ÈÎó²î
-psie = 0; psie1 = 0; psie2 = 0; %³õÊ¼»¯ô¼ÏòÎó²î
+ue = 0; ue1 = 0; ue2 = 0; %åˆå§‹åŒ–é€Ÿåº¦è¯¯å·®
+psie = 0; psie1 = 0; psie2 = 0; %åˆå§‹åŒ–è‰å‘è¯¯å·®
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Lnpp = 50;
-R0=adative_radius(way_points,100,50,3,total);
+Lnpp = 20;
+R0=adative_radius(way_points,30,5,1,total);
 V0=adative_velocity(way_points,2,1,2,total);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%±äÁ¿³õÊ¼»¯
+%%%%%å˜é‡åˆå§‹åŒ–
 Force = zeros(m,1);
 Torque = zeros(m,1);
 Error = zeros(m,1);
@@ -54,11 +56,11 @@ PSID = zeros(m,1);
 BETA = zeros(m,1);
 UERROR = zeros(m,1);
 Output = zeros(m,1);
-x = zeros(6,1); %ÁÙÊ±×´Ì¬±äÁ¿
-T=zeros(m,1); %Ê±¼ä
-Y=zeros(m,6); %×´Ì¬±äÁ¿
+x = zeros(6,1); %ä¸´æ—¶çŠ¶æ€å˜é‡
+T=zeros(m,1); %æ—¶é—´
+Y=zeros(m,6); %çŠ¶æ€å˜é‡
 k = 1;
-%%%%AUV×´Ì¬³õÊ¼»¯
+%%%%AUVçŠ¶æ€åˆå§‹åŒ–
 u0 = 0;
 v0 = 0;
 r0 = 0;
@@ -67,12 +69,12 @@ y0 = 0;
 psi0 = 80*pi/180;
 Initial = [u0;v0;r0;x0;y0;psi0];
 x = Initial;
-%%%%%%%¿ªÊ¼½øÈëÑ­»·
+%%%%%%%å¼€å§‹è¿›å…¥å¾ªçŽ¯
 for i=1:1:m
 t = h*i;
 T(i,1)=t;
-%%%%%%Ê¹ÓÃËÄ½×Áú¸ñ¿âËþ·¨£¬¸ù¾ÝÆäÔË¶¯Ñ§Óë¶¯Á¦Ñ§Î¢·Ö·½³Ì£¨u v r x y psi
-%µÄµ¼Êý£©Çó½âAUVµÄ×´Ì¬£¨u v r x y psi £©¡££¨Ò²¿ÉÖ±½ÓÊ¹ÓÃode45º¯Êý½øÐÐÇó½â£©
+%%%%%%ä½¿ç”¨å››é˜¶é¾™æ ¼åº“å¡”æ³•ï¼Œæ ¹æ®å…¶è¿åŠ¨å­¦ä¸ŽåŠ¨åŠ›å­¦å¾®åˆ†æ–¹ç¨‹ï¼ˆu v r x y psi
+%çš„å¯¼æ•°ï¼‰æ±‚è§£AUVçš„çŠ¶æ€ï¼ˆu v r x y psi ï¼‰ã€‚ï¼ˆä¹Ÿå¯ç›´æŽ¥ä½¿ç”¨ode45å‡½æ•°è¿›è¡Œæ±‚è§£ï¼‰
 k1=Infante_horizontal(t,x,[For,Tor,Cur,Dir]);
 k2=Infante_horizontal(t + h/2, x+h/2.*k1,[For,Tor,Cur,Dir]);
 k3=Infante_horizontal(t + h/2, x+h/2.*k2,[For,Tor,Cur,Dir]);
@@ -85,22 +87,22 @@ Y(i,2) = x(2,1);
 Y(i,3) = x(3,1);
 Y(i,4) = x(4,1);
 Y(i,5) = x(5,1);
-Y(i,6) = x(6,1);%»Ø×ª½Ç
-%%%¶Ôô¼Ïò½Ç½øÐÐÏÞÖÆ£¬Ê¹ÆäÔÚ0-2*piÖ®¼ä
+Y(i,6) = x(6,1);%å›žè½¬è§’
+%%%å¯¹è‰å‘è§’è¿›è¡Œé™åˆ¶ï¼Œä½¿å…¶åœ¨0-2*piä¹‹é—´
 while Y(i,6) > 2*pi
 Y(i,6) = Y(i,6)- 2*pi;
 end
 while Y(i,6) < 0
 Y(i,6) = Y(i,6) + 2*pi;
 end
-%%%%Ê¹ÓÃÔöÁ¿ÐÍPIDËã·¨£¬½«Êµ¼Ê×´Ì¬ÓëÆÚÍû×´Ì¬µÄ²îÖµ×÷ÎªÊä³ö£¬¿ØÖÆÁ¦ÓëÁ¦
-%¾Ø×÷ÎªÊä³ö
-ue2 = ue1;%ÕâÀï PID¿ØÖÆÆ÷µÄÊäÈëÊÇÎó²î
+%%%%ä½¿ç”¨å¢žé‡åž‹PIDç®—æ³•ï¼Œå°†å®žé™…çŠ¶æ€ä¸ŽæœŸæœ›çŠ¶æ€çš„å·®å€¼ä½œä¸ºè¾“å‡ºï¼ŒæŽ§åˆ¶åŠ›ä¸ŽåŠ›
+%çŸ©ä½œä¸ºè¾“å‡º
+ue2 = ue1;%è¿™é‡Œ PIDæŽ§åˆ¶å™¨çš„è¾“å…¥æ˜¯è¯¯å·®
 ue1 = ue;
 ud = velocity;
 ue = ud-Y(i,1);
-For = For+K_p*(ue-ue1)+K_i*ue+K_d*(ue-2*ue1+ue2); %ÕâÀï¾ÍÊÇËùÉè¼ÆµÄ PID ¿ØÖÆ
-%Æ÷£¬¸ù¾ÝËÙ¶ÈÎó²îÀ´µ÷ÕûÍÆÁ¦µÄ´óÐ¡
+For = For+K_p*(ue-ue1)+K_i*ue+K_d*(ue-2*ue1+ue2); %è¿™é‡Œå°±æ˜¯æ‰€è®¾è®¡çš„ PID æŽ§åˆ¶
+%å™¨ï¼Œæ ¹æ®é€Ÿåº¦è¯¯å·®æ¥è°ƒæ•´æŽ¨åŠ›çš„å¤§å°
 if For > FOR_MAX
 For = FOR_MAX;
 elseif For < -FOR_MAX
@@ -119,19 +121,14 @@ end
 % end
 Error(i,1) = psie;
 if psie > beta
-delta_u = K_p1*(psie-psie1)+K_d1*(psie-2*psie1+psie2);%ÕâÀïÓÃ PID ¿ØÖÆÆ÷¸ù¾Ýô¼Ïò½ÇÎó²îÀ´µ÷Õû¶æµÄÁ¦¾Ø
+delta_u = K_p1*(psie-psie1)+K_d1*(psie-2*psie1+psie2);%è¿™é‡Œç”¨ PID æŽ§åˆ¶å™¨æ ¹æ®è‰å‘è§’è¯¯å·®æ¥è°ƒæ•´èˆµçš„åŠ›çŸ©
 else
-delta_u = K_p1*(psie-psie1)+K_i1*psie+K_d1*(psie-2*psie1+psie2);%ÕâÀïÓÃ PID ¿ØÖÆ
+delta_u = K_p1*(psie-psie1)+K_i1*psie+K_d1*(psie-2*psie1+psie2);%è¿™é‡Œç”¨ PID æŽ§åˆ¶
 end
 
 Tor = Tor + delta_u;
 
 
-if Tor > TOR_MAX
-Tor = TOR_MAX;
-elseif Tor < -TOR_MAX
-Tor = -TOR_MAX;
-end
 
 
 [isend,k,velocity] = point(way_points,Y(i,4),Y(i,5),k,total,R0,V0);
@@ -165,22 +162,22 @@ Xp =Y(:,4);
 Yp =Y(:,5);
 Psi = Y(:,6);
 
-%%%%»­Í¼
-figure(1); %%%¿ØÖÆÆ÷Êä³öÁ¦ÓëÁ¦¾Ø
+%%%%ç”»å›¾
+figure(1); %%%æŽ§åˆ¶å™¨è¾“å‡ºåŠ›ä¸ŽåŠ›çŸ©
 subplot(2,1,1);plot(T,Force,'b','LineWidth',2);xlabel('t [s]');ylabel('F[N]');grid on;
 subplot(2,1,2);plot(T,Torque,'b','LineWidth',2);xlabel('t [s]');ylabel('G [N.m]');grid on;
-figure(2);%%%%%%%%%%% u£¬v£¬r
+figure(2);%%%%%%%%%%% uï¼Œvï¼Œr
 subplot(3,1,1);plot(T,U,'b','LineWidth',2);ylim([0 5]);xlabel('t[s]');ylabel('u(forw.vel.)[m/s]');
 grid on;
 subplot(3,1,2);plot(T,V,'b','LineWidth',2);xlabel('t [s]');ylabel('v(side slip vel.)[m/s]');grid on;
 subplot(3,1,3);plot(T,R,'b','LineWidth',2);xlabel('t [s]');ylabel('r(yaw vel.)[rad/s2]');grid on;
 title('Robot velocities in surge, sway and yaw');
-figure(3);%%% x,y ·½ÏòÊµ¼Ê¹ì¼£ÓëÆÚÍû¹ì¼£
-subplot(211);plot(Xp,Yp,'b','LineWidth',2);xlabel(' ¶« Ïò Î» ÒÆ [m]');ylabel(' ±± Ïò Î» ÒÆ[m]');title('UUV º½¼£');grid on;hold on;plot(Npoints,Epoints,'r--');legend('Êµ¼Êº½¼£','ÆÚÍûº½¼£');grid on;
-subplot(212);plot(T,BETA,'b','LineWidth',2);grid on;xlabel('·ÂÕæÊ±¼ä');ylabel('ºáÏò¸ú×ÙÎó²î(m)');
+figure(3);%%% x,y æ–¹å‘å®žé™…è½¨è¿¹ä¸ŽæœŸæœ›è½¨è¿¹
+subplot(211);plot(Xp,Yp,'b','LineWidth',2);xlabel(' ä¸œ å‘ ä½ ç§» [m]');ylabel(' åŒ— å‘ ä½ ç§»[m]');title('UUV èˆªè¿¹');grid on;hold on;plot(Npoints,Epoints,'r--');legend('å®žé™…èˆªè¿¹','æœŸæœ›èˆªè¿¹');grid on;
+subplot(212);plot(T,BETA,'b','LineWidth',2);grid on;xlabel('ä»¿çœŸæ—¶é—´');ylabel('æ¨ªå‘è·Ÿè¸ªè¯¯å·®(m)');
 figure(4);
-subplot(211);plot(T,PSID,'b','LineWidth',2);grid on;xlabel('·ÂÕæÊ±¼ä');ylabel('ÆÚÍûº½Ïò(¡ã)');
-subplot(212);plot(T,Error,'b','LineWidth',2);grid on;xlabel('·ÂÕæÊ±¼ä');ylabel('º½ÏòÎó²î(¡ã)');
+subplot(211);plot(T,PSID,'b','LineWidth',2);grid on;xlabel('ä»¿çœŸæ—¶é—´');ylabel('æœŸæœ›èˆªå‘(Â°)');
+subplot(212);plot(T,Error,'b','LineWidth',2);grid on;xlabel('ä»¿çœŸæ—¶é—´');ylabel('èˆªå‘è¯¯å·®(Â°)');
 figure(5);
-subplot(211);plot(T,UD,'b','LineWidth',2);grid on;xlabel('·ÂÕæÊ±¼ä');ylabel('ÆÚÍûËÙ¶È(m/s)');
-subplot(212);plot(T,UERROR,'b','LineWidth',2);grid on;xlabel('·ÂÕæÊ±¼ä');ylabel('ËÙ¶ÈÎó²î(m/s)');
+subplot(211);plot(T,UD,'b','LineWidth',2);grid on;xlabel('ä»¿çœŸæ—¶é—´');ylabel('æœŸæœ›é€Ÿåº¦(m/s)');
+subplot(212);plot(T,UERROR,'b','LineWidth',2);grid on;xlabel('ä»¿çœŸæ—¶é—´');ylabel('é€Ÿåº¦è¯¯å·®(m/s)');
